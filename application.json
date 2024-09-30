@@ -1,0 +1,11 @@
+{
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://ibendouma.com/"
+        }
+      ]
+    ]
+  }
+  
