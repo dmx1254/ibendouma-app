@@ -1,8 +1,36 @@
+import { useCheckToken } from "@/hooks/checkIsUserTokenValid";
+import useStore from "@/lib/store";
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import * as SecureStore from "expo-secure-store";
+import { useEffect } from "react";
 
 const Layout = () => {
+  const { removeUser } = useStore();
+
+  const userToken = useCheckToken();
+  const token = userToken?.token;
+  // console.log(token);
+  // console.log(token?.exp - Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const tokenExp = token?.exp;
+
+        if (tokenExp && tokenExp - currentTimestamp <= 0) {
+          await SecureStore.deleteItemAsync("token");
+          removeUser();
+        }
+      } catch (error) {
+        console.error("Error checking token:", error);
+      }
+    };
+
+    checkToken();
+  }, [token, removeUser]);
+
   const TabIcon = ({
     focused,
     source,

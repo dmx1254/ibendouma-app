@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CUR } from "@/types/type";
+import { USERLOGINRESPONSE } from "./utils";
 
 interface Cart {
   productId: string;
@@ -30,7 +31,10 @@ interface MyCartStore {
   clearCart: () => void;
   totalItems: number;
   devise: CURRENCY;
+  user: USERLOGINRESPONSE | null;
   addNewDevise: (dev: CURRENCY) => void;
+  addUserAfterLogin: (user: USERLOGINRESPONSE) => void;
+  removeUser: () => void;
 }
 
 const useStore = create<MyCartStore>()(
@@ -39,6 +43,7 @@ const useStore = create<MyCartStore>()(
       carts: [],
       totalItems: 0,
       devise: { currencyName: "mad", curencyVal: 1 },
+      user: null,
       addToCart: (cart) =>
         set((state) => {
           const updateCart = state.carts.map((crt) => {
@@ -91,9 +96,17 @@ const useStore = create<MyCartStore>()(
         }),
       clearCart: () => set({ carts: [], totalItems: 0 }),
       addNewDevise: (dev) => set({ devise: dev }),
+      addUserAfterLogin: (userAdded) =>
+        set({
+          user: userAdded,
+        }),
+      removeUser: () =>
+        set({
+          user: null,
+        }),
     }),
     {
-      name: "cart-storage",
+      name: "ibendouma-app",
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

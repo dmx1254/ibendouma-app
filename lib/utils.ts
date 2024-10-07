@@ -1,3 +1,6 @@
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+
 export const getImg = (imgName: string) => {
   let imgToRet = "";
   switch (imgName) {
@@ -117,7 +120,7 @@ interface PAYMENTMETHOD {
   icon: string;
 }
 
-export interface UserRegister{
+export interface UserRegister {
   lastname: string;
   firstname: string;
   email: string;
@@ -127,4 +130,59 @@ export interface UserRegister{
   address: string;
   postalCode: string;
   password: string;
+}
+
+export interface USERLOGINRESPONSE {
+  _id: string;
+  address: string;
+  city: string;
+  country: string;
+  clientIp: string;
+  createdAt: Date;
+  updatedAt: Date;
+  email: string;
+  firstname: string;
+  lastname: string;
+  isAdmin: boolean;
+  moderator: boolean;
+  online: boolean;
+  password?: string;
+  phone: string;
+  profil: string;
+}
+
+// interface TOKEN {
+//   token: string;
+// }
+
+// interface USERID {
+//   user: string;
+// }
+
+export interface USER {
+  person: USERLOGINRESPONSE;
+  token: string;
+  user: string;
+}
+
+export async function saveToken(key: string, value: string) {
+  await SecureStore.deleteItemAsync("token");
+  await SecureStore.setItemAsync(key, value);
+}
+
+// export const saveAndStockData = async (data: USER) => {
+//   await saveToken("token", data.token);
+//   await addUserAfterLogin(data);
+
+//   router.replace("/");
+// };
+
+export interface DECODEDTOKEN {
+  token: TokenDecode | null;
+}
+
+interface TokenDecode {
+  userId: string;
+  iat: Date;
+  exp: Date;
 }

@@ -25,6 +25,15 @@ module.exports = {
         Lato: ["LatoRegular", "sans-serif"],
         latoBold: ["LatoBold", "sans-serif"],
       },
+      keyframes: {
+        loading: {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(180deg)" },
+        },
+      },
+      animation: {
+        "animate-loading": "loading 1s infinite",
+      },
     },
   },
   plugins: [],
