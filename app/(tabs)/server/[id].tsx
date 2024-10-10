@@ -20,9 +20,17 @@ import Toast from "react-native-toast-message";
 import { ServerP } from "@/types/type";
 import { toastConfig } from "@/components/customToast";
 import useStore from "@/lib/store";
+import { Ionicons } from "@expo/vector-icons";
 
 const ServerPage = () => {
-  const { addToCart, carts, totalItems, devise } = useStore();
+  const {
+    addToCart,
+    devise,
+    addToWishList,
+    user,
+    wishlist,
+    removeFromWish
+  } = useStore();
   const [qty, setQty] = useState<string>("1");
   const w = Dimensions.get("screen").width;
   const { id }: { id: string } = useLocalSearchParams();
@@ -66,6 +74,13 @@ const ServerPage = () => {
     });
   };
 
+  const showToastWishList = () => {
+    Toast.show({
+      type: "success",
+      text2: `${data?.serverName} has been successfully added to your wishlist.`,
+    });
+  };
+
   const handleAddToCart = () => {
     let actualPriceCur = (data?.serverPrice || 1) / devise.curencyVal;
     const cart = {
@@ -85,6 +100,20 @@ const ServerPage = () => {
     showToast();
   };
 
+  const addToWish = () => {
+    if (user && data) {
+      const wish = {
+        userId: user?._id,
+        ...data,
+      };
+
+      addToWishList(wish);
+      showToastWishList();
+    }
+  };
+
+  // console.log(wishlist);
+
   const handleBuyNow = () => {
     const cart = {
       productId: data?._id || "",
@@ -102,6 +131,9 @@ const ServerPage = () => {
     addToCart(cart);
     router.push("/checkout");
   };
+  const checkIsProductIsInMyWiss = () => {
+    return wishlist.some((wish) => wish._id === data?._id);
+  };
 
   return (
     <View className="w-full flex-1 bg-primary-500 font-Lato antialiased">
@@ -113,14 +145,30 @@ const ServerPage = () => {
             height: 220,
           }}
           resizeMode="cover"
+          className="opacity-80"
         />
+        <View className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute top-7 left-2 rotate-180 p-2 rounded-full bg-black/30 z-20"
+          className="absolute top-7 left-2 rotate-180 p-2 rounded-full bg-primary-300 z-20"
         >
-          <Icon name="arrow-right-alt" size={42} color="#FFA000" />
+          <Icon name="arrow-right-alt" size={32} color="#FFA000" />
         </TouchableOpacity>
-        <View className="absolute w-full bg-white opacity-5 top-[0%] h-20"></View>
+        {checkIsProductIsInMyWiss() ? (
+          <TouchableOpacity
+            className="absolute top-7 right-2 p-2 rounded-full bg-primary-300 z-20"
+            onPress={() => removeFromWish(data?._id)}
+          >
+            <Ionicons name="heart-sharp" size={26} color="#ef4444" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            className="absolute top-7 right-2 p-2 rounded-full bg-primary-300 z-20"
+            onPress={addToWish}
+          >
+            <Ionicons name="heart-outline" size={26} color="#FFA000" />
+          </TouchableOpacity>
+        )}
       </View>
       {isLoading ? (
         <ActivityIndicator className="w-full self-center" />
@@ -158,7 +206,7 @@ const ServerPage = () => {
                 <View className="mt-2">
                   <Text className="text-primary-50 font-extrabold text-lg">
                     {data
-                      ? (data.serverPrice / devise.curencyVal).toFixed(1)
+                      ? (data.serverPrice / devise.curencyVal).toFixed(2)
                       : 1}
                     {devise.currencyName === "euro" && "EUR"}
                     {devise.currencyName === "dollar" && "USD"}
@@ -238,7 +286,9 @@ const ServerPage = () => {
               disabled={!returTotalValue}
               onPress={handleBuyNow}
             >
-              <Text className="text-primary-200 text-lg font-semibold">Buy now</Text>
+              <Text className="text-primary-200 text-lg font-semibold">
+                Buy now
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

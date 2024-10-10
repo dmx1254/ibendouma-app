@@ -30,3 +30,64 @@ export interface USERSIGNIN {
   email: string;
   password: string;
 }
+
+export type Product = {
+  productId: string;
+  category: string;
+  server: string;
+  qty: number;
+  amount: number;
+  price: number;
+  character: string;
+};
+
+export type Order = {
+  _id: string;
+  orderNum: string;
+  cur?: string;
+  paymentMethod: string;
+  products: Product[];
+  address: string;
+  status: string;
+  totalPrice: string;
+  date: string;
+  detailUser?: any;
+  paid: string;
+  orderIdPaid: string;
+  infoObjetctPay?: any;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Orders = Order[];
+
+export type SellOrder = {
+  firstname: string;
+  lastname: string;
+  email: string;
+  country: string;
+  city: string;
+  address: string;
+  phone: string;
+  currencymethod: string;
+  _id: string;
+  userId: string;
+  numBuy: string;
+  jeu: string;
+  server: string;
+  pu: number;
+  qte: number;
+  totalPrice: number;
+  paymentInfoDetails?: string;
+  detailUser?: any;
+  paymentMethod: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type OrderSelling = SellOrder[];
+
+export interface WishList extends ServerP {
+  userId: string;
+}

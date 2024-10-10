@@ -126,13 +126,6 @@ const Layout = () => {
         }}
       />
       <Tabs.Screen
-        name="(dofus)/[id]"
-        options={{
-          href: null,
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
         name="cart"
         options={{
           href: null,

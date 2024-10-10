@@ -1,4 +1,3 @@
-import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
 export const getImg = (imgName: string) => {
@@ -186,3 +185,33 @@ interface TokenDecode {
   iat: Date;
   exp: Date;
 }
+
+export const convertedDate = (date: Date) => {
+  const dateConverted = new Date(date).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return dateConverted;
+};
+
+export const orderBuyStatus = [
+  "Terminée",
+  "En attente",
+  "Annulée",
+  "En Cours de payment",
+];
+
+export const orderSellStatus = [
+  "Payée",
+  "En attente",
+  "Annulée",
+  "En Cours de payment",
+];
+
+
+export const resetTime = (date: Date) => {
+  const newDate = new Date(date);
+  newDate.setHours(0, 0, 0, 0);
+  return newDate;
+};

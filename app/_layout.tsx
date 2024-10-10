@@ -3,7 +3,6 @@ import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-
 import "react-native-reanimated";
 
 const queryClient = new QueryClient();
@@ -29,6 +28,8 @@ export default function Layout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="(user)/orders" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)/whishlist" options={{ headerShown: false }} />
       </Stack>
     </QueryClientProvider>
   );

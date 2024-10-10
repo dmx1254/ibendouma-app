@@ -7,35 +7,63 @@ import {
   ScrollView,
   StatusBar,
 } from "react-native";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useStore from "@/lib/store";
 import { Dimensions } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 import * as SecureStore from "expo-secure-store";
+import { useQuery } from "@tanstack/react-query";
 
 // import Icon from "react-native-vector-icons/MaterialIcons";
 
 const Profile = () => {
-  // const { width } = Dimensions.get("screen");
-  const { user, removeUser } = useStore();
+  const { addOrderBuys, addOrderSells, orderSellsLength, orderBuysLength } =
+    useStore();
+  const { user, removeUser, wishListItem } = useStore();
 
   useEffect(() => {
     if (!user) router.replace("/(auth)/sign-in");
   }, [user]);
 
   const profileOptions = [
-    { icon: "cart-outline", title: "My Orders", value: "5 orders" },
-    { icon: "heart-outline", title: "My Wishlist", value: "12 items" },
-    { icon: "wallet-outline", title: "Payment Methods", value: "2 cards" },
+    {
+      icon: "cart-outline",
+      title: "My Orders",
+      value: `${orderSellsLength + orderBuysLength} items`,
+      path: "orders",
+    },
+    {
+      icon: "heart-outline",
+      title: "My Wishlist",
+      value: `${wishListItem} items`,
+      path: "whishlist",
+    },
+    {
+      icon: "wallet-outline",
+      title: "Payment Methods",
+      value: "2 cards",
+      path: "orders",
+    },
     {
       icon: "location-outline",
       title: "Delivery Addresses",
       value: "3 addresses",
+      path: "orders",
     },
-    { icon: "settings-outline", title: "Account Settings", value: "" },
-    { icon: "help-circle-outline", title: "Help & Support", value: "" },
+    {
+      icon: "settings-outline",
+      title: "Account Settings",
+      value: "",
+      path: "orders",
+    },
+    {
+      icon: "help-circle-outline",
+      title: "Help & Support",
+      value: "",
+      path: "orders",
+    },
   ];
 
   const handleLogout = async () => {
@@ -43,6 +71,51 @@ const Profile = () => {
     removeUser();
     router.replace("/");
   };
+
+  const fetchOrders = async () => {
+    const response = await fetch(
+      `https://services.ibendouma.com/api/order/find/65118beb4883ed0de1b39200`
+    );
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  };
+
+  const {
+    isLoading,
+    error,
+    data: orders,
+  } = useQuery({
+    queryKey: ["buyOrders"],
+    queryFn: fetchOrders,
+  });
+
+  const fetchSellOrders = async () => {
+    const response = await fetch(
+      `https://app.ibendouma.com/goapi/buy/user/6455233c1708bd42a16667a0`
+    );
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  };
+  const {
+    isLoading: sellLoading,
+    error: sellError,
+    data: sellOrders,
+  } = useQuery({
+    queryKey: ["sellOrder"],
+    queryFn: fetchSellOrders,
+  });
+
+  useEffect(() => {
+    addOrderBuys(orders);
+  }, [orders]);
+
+  useEffect(() => {
+    addOrderSells(sellOrders);
+  }, [sellOrders]);
 
   return (
     <View className="flex-1 bg-primary-500">
@@ -95,24 +168,26 @@ const Profile = () => {
 
           <View className="mt-6">
             {profileOptions.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                className="flex-row items-center justify-between py-4 border-b border-gray-800"
-                onPress={() => console.log(option.title)}
-              >
-                <View className="flex-row items-center">
-                  <Ionicons name={option.icon} size={26} color="#FFA000" />
-                  <Text className="text-white text-lg ml-4">
-                    {option.title}
-                  </Text>
-                </View>
-                <View className="flex-row items-center">
-                  {option.value && (
-                    <Text className="text-gray-400 mr-2">{option.value}</Text>
-                  )}
-                  <Ionicons name="chevron-forward" size={20} color="#FFA000" />
-                </View>
-              </TouchableOpacity>
+              <Link key={index} href={`(user)/${option.path}`} asChild>
+                <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-800">
+                  <View className="flex-row items-center">
+                    <Ionicons name={option.icon} size={26} color="#FFA000" />
+                    <Text className="text-white text-lg ml-4">
+                      {option.title}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    {option.value && (
+                      <Text className="text-gray-400 mr-2">{option.value}</Text>
+                    )}
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#FFA000"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </Link>
             ))}
             <TouchableOpacity
               className="flex-row items-center justify-between py-4"

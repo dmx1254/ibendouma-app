@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CUR } from "@/types/type";
+import { CUR, Order, SellOrder, WishList } from "@/types/type";
 import { USERLOGINRESPONSE } from "./utils";
 
 interface Cart {
@@ -35,6 +35,16 @@ interface MyCartStore {
   addNewDevise: (dev: CURRENCY) => void;
   addUserAfterLogin: (user: USERLOGINRESPONSE) => void;
   removeUser: () => void;
+  wishlist: WishList[];
+  wishListItem: number;
+  addToWishList: (server: WishList) => void;
+  removeFromWish: (serverId: string | undefined) => void;
+  ordersBuys: Order[];
+  ordersSells: SellOrder[];
+  addOrderBuys: (orders: Order[]) => void;
+  orderBuysLength: number;
+  addOrderSells: (orders: SellOrder[]) => void;
+  orderSellsLength: number;
 }
 
 const useStore = create<MyCartStore>()(
@@ -44,6 +54,12 @@ const useStore = create<MyCartStore>()(
       totalItems: 0,
       devise: { currencyName: "mad", curencyVal: 1 },
       user: null,
+      wishlist: [],
+      wishListItem: 0,
+      ordersBuys: [],
+      ordersSells: [],
+      orderBuysLength: 0,
+      orderSellsLength: 0,
       addToCart: (cart) =>
         set((state) => {
           const updateCart = state.carts.map((crt) => {
@@ -103,6 +119,44 @@ const useStore = create<MyCartStore>()(
       removeUser: () =>
         set({
           user: null,
+        }),
+      addToWishList: (server) =>
+        set((state) => {
+          const productAdded = [...state.wishlist];
+          if (!state.wishlist.some((wish) => wish._id === server._id)) {
+            return {
+              wishlist: [...productAdded, server],
+              wishListItem: [...productAdded, server].length,
+            };
+          }
+          return state;
+        }),
+      removeFromWish: (serverId) =>
+        set((state) => {
+          if (serverId) {
+            const wishListFiltered = [...state.wishlist].filter(
+              (wish) => wish._id !== serverId
+            );
+            return {
+              wishlist: wishListFiltered,
+              wishListItem: wishListFiltered.length,
+            };
+          }
+          return state;
+        }),
+      addOrderBuys: (orders) =>
+        set(() => {
+          return {
+            ordersBuys: orders,
+            orderBuysLength: orders?.length,
+          };
+        }),
+      addOrderSells: (orders) =>
+        set(() => {
+          return {
+            ordersSells: orders,
+            orderSellsLength: orders?.length,
+          };
         }),
     }),
     {
