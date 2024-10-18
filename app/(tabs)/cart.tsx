@@ -1,7 +1,7 @@
+import React from "react";
 import useStore from "@/lib/store";
 import { getServerImg } from "@/lib/utils";
 import { Link, router } from "expo-router";
-import React from "react";
 import {
   View,
   Text,

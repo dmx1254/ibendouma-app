@@ -25,7 +25,7 @@ const CurrencyModal = ({
   const fetchCurrency = async (currency: string): Promise<CUR[]> => {
     // const currency = queryKey[1];
     const response = await fetch(
-      `https://services.ibendouma.com/api/${currency}`
+      `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/${currency}`
     );
     if (!response.ok) {
       throw new Error("Fetching currency failed: ");

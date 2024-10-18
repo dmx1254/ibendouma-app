@@ -49,21 +49,14 @@ const Search = () => {
               )}
             </TouchableOpacity>
           </Link>
-          <Link
-            href={{
-              pathname: "/server/[id]",
-              params: { id: "12415" },
-            }}
-            asChild
+
+          <TouchableOpacity
+            activeOpacity={0.5}
+            className="realtive flex items-center justify-center"
           >
-            <TouchableOpacity
-              activeOpacity={0.5}
-              className="realtive flex items-center justify-center"
-            >
-              <Icon name="notifications" size={36} color="#9ca3af" />
-              <TextInput className="absolute h-2.5 w-2.5 flex items-center justify-center rounded-full bg-secondary-500 top-[6%] left-[60%]"></TextInput>
-            </TouchableOpacity>
-          </Link>
+            <Icon name="notifications" size={36} color="#9ca3af" />
+            <TextInput className="absolute h-2.5 w-2.5 flex items-center justify-center rounded-full bg-secondary-500 top-[6%] left-[60%]"></TextInput>
+          </TouchableOpacity>
 
           <TouchableOpacity
             activeOpacity={0.5}

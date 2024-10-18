@@ -14,10 +14,9 @@ const Home = () => {
     <GestureHandlerRootView className="flex-1 h-full">
       <SafeAreaView className="flex-1 flex-col items-start bg-primary-500 font-Lato">
         <View className="w-full">
-          {/* <Logo /> */}
           <Search />
         </View>
-        <GameSwiper />
+        <GameSwiper pathname="" />
         <Dofus />
       </SafeAreaView>
     </GestureHandlerRootView>

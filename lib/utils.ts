@@ -1,5 +1,11 @@
 import * as SecureStore from "expo-secure-store";
 
+const paypal = require("@/assets/payment-methods/paypal.png");
+const cards = require("@/assets/payment-methods/cards.png");
+const googlepay = require("@/assets/payment-methods/googlepay.png");
+const crypto = require("@/assets/payment-methods/crypto.png");
+const trc20 = require("@/assets/payment-methods/trc20.png");
+
 export const getImg = (imgName: string) => {
   let imgToRet = "";
   switch (imgName) {
@@ -79,44 +85,44 @@ export const paymentMethods: PAYMENTMETHOD[] = [
     name: "Credit Card",
     slug: "credit-card",
     icon: "credit-card",
+    image: cards,
   },
   {
     id: "pac18",
     name: "PayPal",
     slug: "paypal",
     icon: "account-balance-wallet",
+    image: paypal,
   },
   {
     id: "qbj36",
     name: "Google Pay",
     slug: "google-pay",
     icon: "payment",
-  },
-  {
-    id: "yen57",
-    name: "Apple Pay",
-    slug: "apple-pay",
-    icon: "smartphone",
-  },
-  {
-    id: "xkq91",
-    name: "Bank Transfer",
-    slug: "bank-transfer",
-    icon: "account-balance",
+    image: googlepay,
   },
   {
     id: "gxi17",
-    name: "Cryptocurrency",
-    slug: "cryptocurrency",
+    name: "Crypto",
+    slug: "crypto",
     icon: "attach-money",
+    image: crypto,
+  },
+  {
+    id: "kqn52",
+    name: "TRC20",
+    slug: "trc20",
+    icon: "attach-money",
+    image: trc20,
   },
 ];
 
-interface PAYMENTMETHOD {
+export interface PAYMENTMETHOD {
   id: string;
   name: string;
   slug: string;
   icon: string;
+  image: string;
 }
 
 export interface UserRegister {
@@ -169,13 +175,6 @@ export async function saveToken(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
 
-// export const saveAndStockData = async (data: USER) => {
-//   await saveToken("token", data.token);
-//   await addUserAfterLogin(data);
-
-//   router.replace("/");
-// };
-
 export interface DECODEDTOKEN {
   token: TokenDecode | null;
 }
@@ -209,9 +208,77 @@ export const orderSellStatus = [
   "En Cours de payment",
 ];
 
-
 export const resetTime = (date: Date) => {
   const newDate = new Date(date);
   newDate.setHours(0, 0, 0, 0);
   return newDate;
+};
+
+export const sellPaymentMethods: string[] = [
+  "cih bank",
+  "attijariwafa bank",
+  "barid bank",
+  "Western Union",
+  "Cash Plus",
+  "ADV Cash",
+  "Binance Pay",
+  "Payeer",
+  "Wise",
+  "TRC20",
+];
+
+export const codeGenerated = () => {
+  const generateRandomCode =
+    "0123456789abcdefghijklmnopkrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  let myCode = "";
+  for (let i = 0; i < 7; i++) {
+    let code = Math.floor(Math.random() * generateRandomCode.length);
+    myCode += generateRandomCode[code];
+  }
+  return myCode;
+};
+
+export const getLabel = (paymentMethod: string) => {
+  switch (paymentMethod) {
+    case "cih bank":
+    case "attijariwafa bank":
+    case "barid bank":
+      return "Complete RIB";
+    case "Western Union":
+    case "Cash Plus":
+      return "Full name";
+    case "Binance Pay":
+    case "Payeer":
+    case "Wise":
+      return "Payment email";
+    case "ADV Cash":
+      return "Account number";
+    case "TRC20":
+      return "TRX address";
+    default:
+      return "";
+  }
+};
+
+export const getPlaceholder = (paymentMethod: string) => {
+  switch (paymentMethod) {
+    case "cih bank":
+    case "attijariwafa bank":
+    case "barid bank":
+      return "Your RIB";
+    case "Western Union":
+    case "Cash Plus":
+      return "Fullname";
+    case "Binance Pay":
+    case "Payeer":
+    case "Wise":
+      return "Payment email";
+    case "ADV Cash":
+      return "Account number";
+    case "TRC20":
+      return "TRX address";
+    default:
+      return "";
+  }
 };

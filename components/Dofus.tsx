@@ -8,11 +8,11 @@ import { TouchableOpacity } from "react-native";
 import { serverCat } from "@/lib/utils";
 import { ServerP } from "@/types/type";
 
-const Dofus = () => {
+const  Dofus = () => {
   const [item, setItem] = useState<string>("all-servers");
 
   const fetchServers = async (): Promise<ServerP[]> => {
-    const response = await fetch(`https://services.ibendouma.com/api/server`);
+    const response = await fetch(`${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/server`);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }

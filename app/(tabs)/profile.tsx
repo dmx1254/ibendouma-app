@@ -8,13 +8,12 @@ import {
   StatusBar,
 } from "react-native";
 import { Link, router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import useStore from "@/lib/store";
-import { Dimensions } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 import * as SecureStore from "expo-secure-store";
 import { useQuery } from "@tanstack/react-query";
+import { ProfilePage } from "@/types/type";
 
 // import Icon from "react-native-vector-icons/MaterialIcons";
 
@@ -27,7 +26,7 @@ const Profile = () => {
     if (!user) router.replace("/(auth)/sign-in");
   }, [user]);
 
-  const profileOptions = [
+  const profileOptions: ProfilePage[] = [
     {
       icon: "cart-outline",
       title: "My Orders",
@@ -44,25 +43,25 @@ const Profile = () => {
       icon: "wallet-outline",
       title: "Payment Methods",
       value: "2 cards",
-      path: "orders",
+      path: "payment-methods",
     },
     {
       icon: "location-outline",
       title: "Delivery Addresses",
       value: "3 addresses",
-      path: "orders",
+      path: "delivery-address",
     },
     {
       icon: "settings-outline",
       title: "Account Settings",
       value: "",
-      path: "orders",
+      path: "account-settings",
     },
     {
       icon: "help-circle-outline",
       title: "Help & Support",
       value: "",
-      path: "orders",
+      path: "help-support",
     },
   ];
 
@@ -74,7 +73,7 @@ const Profile = () => {
 
   const fetchOrders = async () => {
     const response = await fetch(
-      `https://services.ibendouma.com/api/order/find/65118beb4883ed0de1b39200`
+      `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/order/find/65118beb4883ed0de1b39200`
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");
@@ -93,7 +92,7 @@ const Profile = () => {
 
   const fetchSellOrders = async () => {
     const response = await fetch(
-      `https://app.ibendouma.com/goapi/buy/user/6455233c1708bd42a16667a0`
+      `${process.env.EXPO_PUBLIC_IBYTRADE_CLIENT_URL}/buy/user/6455233c1708bd42a16667a0`
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");

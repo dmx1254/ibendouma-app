@@ -9,12 +9,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { saveToken } from "@/lib/utils";
 import useStore from "@/lib/store";
 
@@ -26,21 +24,35 @@ const SignIn = () => {
     passwordError: "",
   });
 
-  //   console.log(user);<
+  //   console.log(user);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const result = await axios.post(
-        "https://services.ibendouma.com/api/users/login",
-        user
-      );
-      if (result.data) {
-        await saveToken("token", result.data.token);
-        await addUserAfterLogin(result.data.person);
-        router.replace("/profile");
-        // console.log(result.data);
+      try {
+        const result = await axios.post(
+          `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/users/login`,
+          user
+        );
+        if (result.data) {
+          await saveToken("token", result.data.token);
+          await addUserAfterLogin(result.data.person);
+          router.replace("/profile");
+          // console.log(result.data);
+        }
+        return result;
+      } catch (error: any) {
+        const errMess: string = error?.response?.data?.message;
+        if (errMess.includes("email")) {
+          setError((prevErrMess) => ({ ...prevErrMess, emailError: errMess }));
+        } else if (errMess.includes("passe")) {
+          setError((prevErrMess) => ({
+            ...prevErrMess,
+            passwordError: errMess,
+          }));
+        } else {
+          setError({ emailError: "", passwordError: "" });
+        }
       }
-      return result;
     },
   });
 
@@ -59,7 +71,7 @@ const SignIn = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 w-full items-center justify-center"
       >
-        <View className="w-full flex-col items-center">
+        <View className="w-full flex-col items-center justify-center">
           <View className="text-2xl flex-col items-center mb-10">
             <Text className="text-5xl text-white font-extrabold uppercase">
               Welcome!
@@ -76,13 +88,12 @@ const SignIn = () => {
               placeholder="Email"
               icon="mail"
             />
-            {mutation.isError && (
+            {error.emailError && (
               <Text
                 className="text-base text-red-300 w-full px-4 pt-2"
                 numberOfLines={2}
               >
-                {mutation.error.message &&
-                  "Incorrect email address or password"}
+                {error.emailError}
               </Text>
             )}
           </View>
@@ -98,6 +109,14 @@ const SignIn = () => {
               placeholder="Password"
               icon="lock"
             />
+            {error.passwordError && (
+              <Text
+                className="text-base text-red-300 w-full px-4 pt-2"
+                numberOfLines={2}
+              >
+                {error.passwordError}
+              </Text>
+            )}
           </View>
           <TouchableOpacity
             activeOpacity={0.5}
@@ -108,17 +127,7 @@ const SignIn = () => {
             <Text className="text-primary-200 text-center text-xl font-bold">
               {mutation.isPending ? "Is SignIn..." : "Sign In"}
             </Text>
-            {/* <View className="ml-2 animate-animate-loading">
-              <Icon name="cached" size={30} color="#3b3b3b" />
-            </View> */}
           </TouchableOpacity>
-          {/* <ScrollView>
-            {mutation.isSuccess && (
-              <Text className="text-white overflow-y-scroll">
-                {JSON.stringify(mutation.data.data, null, 2)}
-              </Text>
-            )}
-          </ScrollView> */}
 
           <Link href="/(auth)/sign-up" asChild>
             <TouchableOpacity

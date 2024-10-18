@@ -1,22 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CUR, Order, SellOrder, WishList } from "@/types/type";
+import { CUR, Cart, Order, SellOrder, WishList } from "@/types/type";
 import { USERLOGINRESPONSE } from "./utils";
 
-interface Cart {
-  productId: string;
-  category: string;
-  server: string;
-  qty: number;
-  amount: number;
-  unitPrice: number;
-  totalPrice: number;
-  image: string;
-  type: string;
-  currency: string;
-  valCurrency: number;
-}
 
 interface CURRENCY {
   currencyName: string;

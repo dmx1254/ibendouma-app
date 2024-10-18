@@ -85,16 +85,7 @@ const Layout = () => {
           ),
         }}
       />
-      <Tabs.Screen
-        name="news"
-        options={{
-          title: "News",
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} source="newspaper" size={32} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="sellkamas"
         options={{
@@ -102,6 +93,16 @@ const Layout = () => {
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} source="sell" size={32} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="news"
+        options={{
+          title: "News",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} source="newspaper" size={32} />
           ),
         }}
       />
@@ -159,6 +160,14 @@ const Layout = () => {
       />
       <Tabs.Screen
         name="server/[id]"
+        options={{
+          href: null,
+          headerShown: false,
+          tabBarStyle: { display: "none" },
+        }}
+      />
+      <Tabs.Screen
+        name="sell-server/[id]"
         options={{
           href: null,
           headerShown: false,

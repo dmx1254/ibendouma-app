@@ -9,6 +9,18 @@ declare interface ServerP {
   updatedAt: Date;
 }
 
+
+export interface SellServerType {
+  _id: string;
+  serverName: string;
+  serverCategory: string;
+  serverStatus: string;
+  serverPriceDh: number;
+  serverMinQty: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ToastProps {
   text1?: string; // Texte principal
   text2?: string; // Texte secondaire
@@ -91,3 +103,36 @@ export type OrderSelling = SellOrder[];
 export interface WishList extends ServerP {
   userId: string;
 }
+
+export interface ProfilePage {
+  icon: string;
+  title: string;
+  value: string;
+  path: string;
+}
+
+export type InputFieldProps = {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  keyboardType?: KeyboardTypeOptions;
+  multiline?: boolean;
+  isQty?: boolean;
+};
+
+
+export interface Cart {
+  productId: string;
+  category: string;
+  server: string;
+  qty: number;
+  amount: number;
+  unitPrice: number;
+  totalPrice: number;
+  image: string;
+  type: string;
+  currency: string;
+  valCurrency: number;
+}
+

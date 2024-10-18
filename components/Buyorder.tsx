@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { FlatList, Image, Text, View, ActivityIndicator } from "react-native";
-import { SellOrderItem } from "./SellOrderItem";
+import { FlatList, Text, View } from "react-native";
 import { OrderItem } from "./OrderItem";
 import { Order } from "@/types/type";
 import useStore from "@/lib/store";

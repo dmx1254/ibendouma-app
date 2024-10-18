@@ -5,7 +5,7 @@ export const useCheckToken = () => {
   const fetchServers = async () => {
     const token = await SecureStore.getItemAsync("token");
     const response = await fetch(
-      "https://services.ibendouma.com/api/users/verifyToken",
+      `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/users/verifyToken`,
       {
         headers: { Authorization: "Bearer " + token },
       }

@@ -30,6 +30,10 @@ export default function Layout() {
         <Stack.Screen name="+not-found" />
         <Stack.Screen name="(user)/orders" options={{ headerShown: false }} />
         <Stack.Screen name="(user)/whishlist" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)/payment-methods" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)/delivery-address" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)/account-settings" options={{ headerShown: false }} />
+        <Stack.Screen name="(user)/help-support" options={{ headerShown: false }} />
       </Stack>
     </QueryClientProvider>
   );

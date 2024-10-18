@@ -1,51 +1,40 @@
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
-  Image,
-  Dimensions,
-  ImageProps,
+  ScrollView,
   TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Dimensions,
   ActivityIndicator,
   Alert,
-  ScrollView,
-  TextInput,
+  ViewStyle,
 } from "react-native";
-import React, { useMemo, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { getServerImg } from "@/lib/utils";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { useQuery } from "@tanstack/react-query";
-
-import Toast from "react-native-toast-message";
-import { ServerP } from "@/types/type";
-import { toastConfig } from "@/components/customToast";
-import useStore from "@/lib/store";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import { ServerP } from "@/types/type";
+import useStore from "@/lib/store";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/components/customToast";
 
 const ServerPage = () => {
-  const {
-    addToCart,
-    devise,
-    addToWishList,
-    user,
-    wishlist,
-    removeFromWish
-  } = useStore();
+  const { addToCart, devise, addToWishList, user, wishlist, removeFromWish } =
+    useStore();
   const [qty, setQty] = useState<string>("1");
-  const w = Dimensions.get("screen").width;
   const { id }: { id: string } = useLocalSearchParams();
-  //   console.log(id);
   const tabSplit = id.split("-");
   const serverId = tabSplit[2];
   const serverCat = tabSplit.slice(0, tabSplit.length - 1).join("-");
-  // console.log(carts);
-  // console.log(totalItems);
 
   const getSingleServer = (): Promise<ServerP> => {
-    const server = fetch(
-      `https://services.ibendouma.com/api/server/${serverId}`
+    return fetch(
+      `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/server/${serverId}`
     ).then((res) => res.json());
-    return server;
   };
 
   const { isLoading, data, error } = useQuery({
@@ -53,11 +42,7 @@ const ServerPage = () => {
     queryFn: getSingleServer,
   });
 
-  if (error) {
-    Alert.alert("Error", error.message);
-  }
-
-  //   console.log(data);
+  if (error) Alert.alert("Error", error.message);
 
   const returTotalValue = useMemo(() => {
     const serverValue = parseInt(qty, 10);
@@ -65,21 +50,7 @@ const ServerPage = () => {
     let actualPriceCur = (data?.serverPrice || 1) / devise.curencyVal;
     let total = (serverValue * actualPriceCur).toFixed(2);
     return Number(total);
-  }, [qty, data?.serverPrice]);
-
-  const showToast = () => {
-    Toast.show({
-      type: "success",
-      text2: `${data?.serverName} has been successfully added to your cart.`,
-    });
-  };
-
-  const showToastWishList = () => {
-    Toast.show({
-      type: "success",
-      text2: `${data?.serverName} has been successfully added to your wishlist.`,
-    });
-  };
+  }, [qty, data?.serverPrice, devise.curencyVal]);
 
   const handleAddToCart = () => {
     let actualPriceCur = (data?.serverPrice || 1) / devise.curencyVal;
@@ -97,205 +68,332 @@ const ServerPage = () => {
       valCurrency: devise.curencyVal,
     };
     addToCart(cart);
-    showToast();
+    Toast.show({
+      type: "success",
+      text2: `${data?.serverName} has been successfully added to your cart.`,
+    });
   };
 
-  const addToWish = () => {
-    if (user && data) {
-      const wish = {
-        userId: user?._id,
-        ...data,
-      };
+  const handleBuyNow = () => {
+    handleAddToCart();
+    router.push("/checkout");
+  };
 
-      addToWishList(wish);
-      showToastWishList();
+  const toggleWishlist = () => {
+    if (user && data) {
+      if (checkIsProductIsInMyWish()) {
+        removeFromWish(data._id);
+      } else {
+        const wish = { userId: user._id, ...data };
+        addToWishList(wish);
+        Toast.show({
+          type: "success",
+          text2: `${data.serverName} has been successfully added to your wishlist.`,
+        });
+      }
     }
   };
 
-  // console.log(wishlist);
-
-  const handleBuyNow = () => {
-    const cart = {
-      productId: data?._id || "",
-      category: data?.serverCategory || "",
-      server: data?.serverName || "",
-      qty: data?.serverMinQty || 1,
-      amount: parseInt(qty, 10),
-      unitPrice: data?.serverPrice || 1,
-      totalPrice: returTotalValue,
-      image: serverCat,
-      type: "dofus",
-      currency: devise.currencyName,
-      valCurrency: devise.curencyVal,
-    };
-    addToCart(cart);
-    router.push("/checkout");
-  };
-  const checkIsProductIsInMyWiss = () => {
+  const checkIsProductIsInMyWish = () => {
     return wishlist.some((wish) => wish._id === data?._id);
   };
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#FFA000" />
+      </View>
+    );
+  }
+
   return (
-    <View className="w-full flex-1 bg-primary-500 font-Lato antialiased">
-      <View className="relative">
-        <Image
-          source={getServerImg(serverCat) as ImageProps}
-          style={{
-            width: w,
-            height: 220,
-          }}
-          resizeMode="cover"
-          className="opacity-80"
-        />
-        <View className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900" />
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#FFA000", "#FF6B00"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
-          className="absolute top-7 left-2 rotate-180 p-2 rounded-full bg-primary-300 z-20"
+          style={styles.backButton}
         >
-          <Icon name="arrow-right-alt" size={32} color="#FFA000" />
+          <Ionicons name="arrow-back" size={24} color="#FFA000" />
         </TouchableOpacity>
-        {checkIsProductIsInMyWiss() ? (
-          <TouchableOpacity
-            className="absolute top-7 right-2 p-2 rounded-full bg-primary-300 z-20"
-            onPress={() => removeFromWish(data?._id)}
-          >
-            <Ionicons name="heart-sharp" size={26} color="#ef4444" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            className="absolute top-7 right-2 p-2 rounded-full bg-primary-300 z-20"
-            onPress={addToWish}
-          >
-            <Ionicons name="heart-outline" size={26} color="#FFA000" />
-          </TouchableOpacity>
-        )}
-      </View>
-      {isLoading ? (
-        <ActivityIndicator className="w-full self-center" />
-      ) : (
-        <View className="w-full flex-1 bg-primary-400 text-white p-4">
-          <ScrollView className="" showsVerticalScrollIndicator={false}>
-            <View className="w-full flex-row items-center justify-between bg-primary-300 p-3 rounded-lg">
-              <View className="flex-col items-start gap-1">
-                <Text className="text-secondary-400 text-xl font-extrabold">
-                  Server Category
-                </Text>
-                <View className="bg-primary-100 rounded-full px-2 py-1.5 text-center mt-2">
-                  <Text className="text-secondary-400 text-base font-extrabold capitalize">
-                    {serverCat.split("-").join(" ")}
-                  </Text>
-                </View>
-              </View>
+        <BlurView intensity={80} tint="dark" style={styles.blurView}>
+          <Text style={styles.headerText}>{data?.serverName}</Text>
+          <Text style={styles.subHeaderText}>{data?.serverCategory}</Text>
+        </BlurView>
+        <TouchableOpacity
+          style={styles.wishlistButton}
+          onPress={toggleWishlist}
+        >
+          <Ionicons
+            name={checkIsProductIsInMyWish() ? "heart" : "heart-outline"}
+            size={24}
+            color={checkIsProductIsInMyWish() ? "#ef4444" : "#FFA000"}
+          />
+        </TouchableOpacity>
+      </LinearGradient>
 
-              <View className="flex-col items-start gap-1">
-                <Text className="text-secondary-400 text-xl font-extrabold">
-                  Server Name
-                </Text>
-                <View className="bg-primary-100 rounded-full px-2 py-1.5 text-center mt-2">
-                  <Text className="text-secondary-400 text-base font-extrabold capitalize">
-                    {data?.serverName}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="w-full flex-row items-center justify-between my-8">
-              <View className="flex-col items-start">
-                <Text className="text-primary-50 text-xl font-extrabold">
-                  Server Price
-                </Text>
-                <View className="mt-2">
-                  <Text className="text-primary-50 font-extrabold text-lg">
-                    {data
-                      ? (data.serverPrice / devise.curencyVal).toFixed(2)
-                      : 1}
-                    {devise.currencyName === "euro" && "EUR"}
-                    {devise.currencyName === "dollar" && "USD"}
-                    {devise.currencyName === "mad" && "MAD"}
-                  </Text>
-                </View>
-              </View>
-              <View className="flex-col items-start">
-                <Text className="text-primary-50 text-xl font-extrabold">
-                  Server Status
-                </Text>
-                <View
-                  className={`rounded-full px-2 py-1.5 mt-2 ${data?.serverStatus === "Disponible" ? "bg-green-100" : "bg-blue-100"}`}
-                >
-                  <Text
-                    className={`font-bold text-white text-base ${data?.serverStatus === "Disponible" ? "text-green-600" : "text-blue-600"}`}
-                  >
-                    {data?.serverStatus}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="w-full flex-col items-center mb-4">
-              <View className="relative w-full flex-col items-start p-4">
-                <Text className="text-primary-50 text-lg font-extrabold">
-                  How many kamas do you need?
-                </Text>
-                <TextInput
-                  className="w-full bg-primary-300 mt-3 text-white/70 text-lg p-4 rounded-lg"
-                  placeholder="Enter quantity"
-                  keyboardType="numeric"
-                  value={qty}
-                  onChangeText={setQty}
-                />
-                <Text className="absolute text-primary-50 text-lg left-[94%] top-[42%] font-extrabold">
-                  M
-                </Text>
-                <View className="w-full flex-row items-center justify-between my-4">
-                  <View className="bg-red-50 rounded-full p-1.5">
-                    <Text className="text-red-400 text-bs font-extrabold">
-                      Note: 1 = 1 million
-                    </Text>
-                  </View>
-                  {returTotalValue && (
-                    <View className="flex-row items-center">
-                      <Text className="text-primary-50 text-xl font-extrabold">
-                        Total:{" "}
-                      </Text>
-                      <Text className="ml-0.5 text-primary-50 text-xl font-extrabold">
-                        {returTotalValue}{" "}
-                        {devise.currencyName === "euro" && "EUR"}
-                        {devise.currencyName === "dollar" && "USD"}
-                        {devise.currencyName === "mad" && "MAD"}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </View>
-            {/* <Text className="text-white">{JSON.stringify(data, null, 2)}</Text> */}
-          </ScrollView>
-          <View className="w-full flex-col items-center bottom-2">
-            <TouchableOpacity
-              activeOpacity={0.5}
-              className={`w-full flex-row items-center justify-center bg-secondary-400 shadow-2xl rounded-full p-4 ${!returTotalValue ? "opacity-50" : ""}`}
-              onPress={handleAddToCart}
-              disabled={!returTotalValue}
-            >
-              <Text className="text-primary-200 text-lg font-semibold mr-1">
-                Add to cart
-              </Text>
-              <Icon name="local-mall" size={20} color="#3b3b3b" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.5}
-              className="w-full flex-row items-center justify-center bg-secondary-400 shadow-2xl rounded-full my-4 p-4"
-              disabled={!returTotalValue}
-              onPress={handleBuyNow}
-            >
-              <Text className="text-primary-200 text-lg font-semibold">
-                Buy now
-              </Text>
-            </TouchableOpacity>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(500)}
+          style={styles.infoCard}
+        >
+          <View style={styles.infoRow}>
+            <InfoItem
+              title="Server Category"
+              value={serverCat.split("-").join(" ")}
+            />
+            <InfoItem title="Server Name" value={data?.serverName || ""} />
           </View>
-        </View>
-      )}
+          <View style={styles.infoRow}>
+            <InfoItem
+              title="Server Price"
+              value={`${((data?.serverPrice || 1) / devise.curencyVal).toFixed(2)} ${devise.currencyName.toUpperCase()}`}
+            />
+            <InfoItem
+              title="Server Status"
+              value={data?.serverStatus || ""}
+              customStyle={
+                data?.serverStatus === "Disponible"
+                  ? styles.statusAvailable
+                  : styles.statusUnavailable
+              }
+            />
+          </View>
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeInDown.delay(400).duration(500)}
+          style={styles.quantityContainer}
+        >
+          <Text style={styles.quantityLabel}>How many kamas do you need?</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.quantityInput}
+              placeholder="Enter quantity"
+              keyboardType="numeric"
+              value={qty}
+              onChangeText={setQty}
+            />
+            <Text style={styles.unitText}>M</Text>
+          </View>
+          <Text style={styles.note}>Note: 1 = 1 million</Text>
+          {returTotalValue && (
+            <Text style={styles.totalText}>
+              Total: {returTotalValue} {devise.currencyName.toUpperCase()}
+            </Text>
+          )}
+        </Animated.View>
+      </ScrollView>
+
+      <Animated.View
+        entering={FadeInRight.delay(600).duration(500)}
+        style={styles.buttonContainer}
+      >
+        <TouchableOpacity
+          style={[
+            styles.button,
+            styles.addToCartButton,
+            !returTotalValue && styles.disabledButton,
+          ]}
+          onPress={handleAddToCart}
+          disabled={!returTotalValue}
+        >
+          <Text style={styles.buttonText}>Add to cart</Text>
+          <Ionicons name="cart-outline" size={24} color="#3b3b3b" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            styles.buyNowButton,
+            !returTotalValue && styles.disabledButton,
+          ]}
+          onPress={handleBuyNow}
+          disabled={!returTotalValue}
+        >
+          <Text style={styles.buttonText}>Buy now</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
       <Toast config={toastConfig} />
     </View>
   );
 };
+
+const InfoItem = ({
+  title,
+  value,
+  customStyle = {},
+}: {
+  title: string;
+  value: string;
+  customStyle?: ViewStyle;
+}) => (
+  <View style={styles.infoItem}>
+    <Text style={styles.infoTitle}>{title}</Text>
+    <View style={[styles.infoValue, customStyle]}>
+      <Text style={styles.infoValueText}>{value}</Text>
+    </View>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#121212",
+  },
+  header: {
+    height: 200,
+    justifyContent: "flex-end",
+    padding: 20,
+  },
+  backButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    backgroundColor: "#2C2C2C",
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 10,
+  },
+  wishlistButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "#2C2C2C",
+    borderRadius: 20,
+    padding: 8,
+    zIndex: 10,
+  },
+  blurView: {
+    borderRadius: 15,
+    overflow: "hidden",
+    padding: 15,
+  },
+  headerText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    marginBottom: 5,
+  },
+  subHeaderText: {
+    fontSize: 16,
+    color: "#FFE082",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  infoCard: {
+    backgroundColor: "#1F1F1F",
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+  },
+  infoRow: {
+    flexDirection: "row",
+    gap: 20,
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  infoItem: {
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 18,
+    color: "#9A9A9A",
+    marginBottom: 8,
+  },
+  infoValue: {
+    backgroundColor: "#2C2C2C",
+    borderRadius: 10,
+    padding: 10,
+  },
+  infoValueText: {
+    fontSize: 16,
+    color: "#FFD54F",
+    fontWeight: "bold",
+  },
+  statusAvailable: {
+    backgroundColor: "#4CAF50",
+  },
+  statusUnavailable: {
+    backgroundColor: "#2196F3",
+  },
+  quantityContainer: {
+    backgroundColor: "#1F1F1F",
+    borderRadius: 15,
+    padding: 20,
+  },
+  quantityLabel: {
+    fontSize: 18,
+    color: "#FFFFFF",
+    marginBottom: 10,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2C2C2C",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  quantityInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 18,
+    padding: 15,
+  },
+  unitText: {
+    color: "#FFD54F",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 15,
+  },
+  note: {
+    color: "#FF6B6B",
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  totalText: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  buttonContainer: {
+    padding: 20,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  addToCartButton: {
+    backgroundColor: "#FFC107",
+  },
+  buyNowButton: {
+    backgroundColor: "#FF9800",
+  },
+  buttonText: {
+    color: "#3b3b3b",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});
 
 export default ServerPage;

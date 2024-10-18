@@ -1,20 +1,20 @@
 import React from "react";
 import useStore from "@/lib/store";
 import { getServerImg } from "@/lib/utils";
-import { ServerP } from "@/types/type";
+import { SellServerType } from "@/types/type";
 import { Link } from "expo-router";
-import { View, Image, Text, TouchableOpacity, ImageProps } from "react-native";
+import { View, Image, Text, ImageProps } from "react-native";
 
 interface ServerProps {
-  item: ServerP;
+  item: SellServerType;
 }
 
-const Server: React.FC<ServerProps> = ({ item }) => {
+const SellServer: React.FC<ServerProps> = ({ item }) => {
   const { devise } = useStore();
   return (
     <Link
       href={{
-        pathname: "/server/[id]",
+        pathname: "/sell-server/[id]",
         params: { id: `${item.serverCategory}-${item._id}` },
       }}
     >
@@ -36,7 +36,7 @@ const Server: React.FC<ServerProps> = ({ item }) => {
               {devise.currencyName === "euro" && "EUR"}
               {devise.currencyName === "dollar" && "USD"}
               {devise.currencyName === "mad" && "MAD"}
-              {(item.serverPrice / devise.curencyVal).toFixed(1)}
+              {(item.serverPriceDh / devise.curencyVal).toFixed(1)}
             </Text>
           </View>
         </View>
@@ -45,4 +45,4 @@ const Server: React.FC<ServerProps> = ({ item }) => {
   );
 };
 
-export default Server;
+export default SellServer;
