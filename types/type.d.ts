@@ -134,5 +134,6 @@ export interface Cart {
   type: string;
   currency: string;
   valCurrency: number;
+  character: string;
 }
 

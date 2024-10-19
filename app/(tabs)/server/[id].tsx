@@ -26,6 +26,7 @@ const ServerPage = () => {
   const { addToCart, devise, addToWishList, user, wishlist, removeFromWish } =
     useStore();
   const [qty, setQty] = useState<string>("1");
+  const [character, setCharacter] = useState<string>("");
   const { id }: { id: string } = useLocalSearchParams();
   const tabSplit = id.split("-");
   const serverId = tabSplit[2];
@@ -66,6 +67,7 @@ const ServerPage = () => {
       type: "dofus",
       currency: devise.currencyName,
       valCurrency: devise.curencyVal,
+      character: character,
     };
     addToCart(cart);
     Toast.show({
@@ -169,6 +171,16 @@ const ServerPage = () => {
           entering={FadeInDown.delay(400).duration(500)}
           style={styles.quantityContainer}
         >
+          <Text style={styles.quantityLabel}>Enter your character</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.quantityInput}
+              placeholder="Enter your character"
+              keyboardType="default"
+              value={character}
+              onChangeText={setCharacter}
+            />
+          </View>
           <Text style={styles.quantityLabel}>How many kamas do you need?</Text>
           <View style={styles.inputWrapper}>
             <TextInput
@@ -197,10 +209,10 @@ const ServerPage = () => {
           style={[
             styles.button,
             styles.addToCartButton,
-            !returTotalValue && styles.disabledButton,
+            (!returTotalValue || !character) && styles.disabledButton,
           ]}
           onPress={handleAddToCart}
-          disabled={!returTotalValue}
+          disabled={!returTotalValue || !character}
         >
           <Text style={styles.buttonText}>Add to cart</Text>
           <Ionicons name="cart-outline" size={24} color="#3b3b3b" />
@@ -209,10 +221,10 @@ const ServerPage = () => {
           style={[
             styles.button,
             styles.buyNowButton,
-            !returTotalValue && styles.disabledButton,
+            (!returTotalValue || !character) && styles.disabledButton,
           ]}
           onPress={handleBuyNow}
-          disabled={!returTotalValue}
+          disabled={!returTotalValue || !character}
         >
           <Text style={styles.buttonText}>Buy now</Text>
         </TouchableOpacity>
@@ -291,7 +303,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 15,
   },
   infoCard: {
     backgroundColor: "#1F1F1F",
@@ -330,9 +342,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#2196F3",
   },
   quantityContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 8,
     backgroundColor: "#1F1F1F",
     borderRadius: 15,
-    padding: 20,
+    padding: 15,
   },
   quantityLabel: {
     fontSize: 18,

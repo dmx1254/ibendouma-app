@@ -11,14 +11,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import useStore from "@/lib/store";
-import { PAYMENTMETHOD, paymentMethods } from "@/lib/utils";
+import {
+  PAYMENTMETHOD,
+  orderBuyNumGenerated,
+  paymentMethods,
+} from "@/lib/utils";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Cart } from "@/types/type";
 import { ImageProps } from "react-native";
 
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/components/customToast";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+
 const Checkout = () => {
-  const { carts } = useStore();
+  const { carts, user } = useStore();
+  const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
   // console.log(carts);
   const totalOrderAmount = carts.reduce(
     (acc, item) => acc + item.totalPrice,
@@ -38,6 +48,65 @@ const Checkout = () => {
         return "";
     }
   };
+
+  const showToast = () => {
+    Toast.show({
+      type: "success",
+      text2: "Your order buy added successfully",
+    });
+  };
+
+  const handleAddOrder = () => {
+    const products = carts.map((cart) => {
+      return {
+        productId: cart.productId,
+        category: cart.category,
+        server: cart.server,
+        qty: cart.qty,
+        amount: cart.amount,
+        price: cart.unitPrice.toFixed(2),
+        character: cart.character,
+        totalPrice: cart.totalPrice,
+      };
+    });
+    let totalPrice = carts.reduce((acc, item) => acc + item.totalPrice, 0);
+
+    const order = {
+      userId: user?._id,
+      orderNum: orderBuyNumGenerated(),
+      products: products,
+      address: user?.address,
+      status: "En attente",
+      totalPrice: totalPrice,
+      paymentMethod: activePayment,
+      orderIdPaid: "",
+      cur: carts[0]?.currency,
+      valCurency: carts[0]?.valCurrency,
+    };
+    if (user) {
+      return order;
+    }
+  };
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const order = handleAddOrder();
+      try {
+        setPaymentLoading(true);
+        const result = await axios.post(
+          `${process.env.EXPO_PUBLIC_IBENDOUMA_CLIENT_URL}/order`,
+          order
+        );
+        if (result.data) {
+          showToast();
+        }
+      } catch ({ response }: any) {
+        console.log(response);
+      } finally {
+        setPaymentLoading(false);
+      }
+    },
+  });
+
   const renderOrderItem = ({ item, index }: { item: Cart; index: number }) => (
     <Animated.View
       entering={FadeInRight.delay(index * 100).duration(400)}
@@ -153,11 +222,15 @@ const Checkout = () => {
             styles.confirmButton,
             !activePayment && styles.disabledButton,
           ]}
-          disabled={!activePayment}
+          disabled={!activePayment || !user}
+          onPress={() => mutation.mutate()}
         >
-          <Text style={styles.confirmButtonText}>Confirm and Pay</Text>
+          <Text style={styles.confirmButtonText}>
+            {paymentLoading ? "Is processing..." : "Confirm and Pay"}
+          </Text>
         </TouchableOpacity>
       </LinearGradient>
+      <Toast config={toastConfig} />
     </SafeAreaView>
   );
 };

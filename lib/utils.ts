@@ -282,3 +282,17 @@ export const getPlaceholder = (paymentMethod: string) => {
       return "";
   }
 };
+
+
+
+export const orderBuyNumGenerated = () => {
+  const generateOrderNum = "0123456789";
+
+  let myCode = "";
+  for (let i = 0; i < 6; i++) {
+    let code = Math.floor(Math.random() * generateOrderNum.length);
+    myCode += generateOrderNum[code];
+  }
+  return myCode;
+};
+
